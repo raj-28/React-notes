@@ -1,0 +1,131 @@
+Error Handling in React
+=======================
+Error handling, which is also part of a Component Life Cycle, is done in React using the below methods
+	static getDerivedStateFromError()  
+	componentDidCatch()
+
+Classes that define either of the above methods are called Error Boundaries. Components that may cause errors (runtime or business scenario related) should be wrapped within Error Boundaries. Whenever a component crashes because of a JavaScript error, the error will be logged and fall back UI is displayed.
+
+Let's say you have an Account component which supports withdraw method. But what if withdraw amount is greater than balance?
+
+1. Create a component Account inside components\error as shown:
+	import React from "react";
+
+	export default class Account extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  balance: 1200,	
+		};
+	  }
+
+	  withdraw = () => {
+		this.setState({
+		  balance: this.state.balance - 500,
+		});
+	  };
+
+	  render() {
+		// check is balance < withdraw amount
+		// we are doing it here since EB cannot 
+		// catch errors in event handlers 
+		if (0 > this.state.balance) {
+		  throw new Error("Insufficient balance.");
+		}
+		return (
+		  <React.Fragment>
+			<h2>Account</h2>
+			<p>Current Balance: {this.state.balance}</p>
+			<button type="button" className="btn btn-info" onClick={this.withdraw}>
+			  Withdraw 500
+			</button>
+		  </React.Fragment>
+		);
+	  }
+	}
+	
+	
+2. Create EB, AccErrorHandler, in the same folder as shown:
+	import React from "react";
+
+	export default class AccErrorHandler extends React.Component {
+	  constructor(props) {
+		super(props);
+		this.state = { hasError: false, error: null, errorInfo: null };
+	  }
+
+	  // Update state so the next render will show the fallback UI
+	  static getDerivedStateFromError(error) {
+		return { hasError: true };
+	  }
+
+	  componentDidCatch(error, errorInfo) {
+		// Catch errors in any components below and re-render with error message
+		this.setState({
+		  error: error,
+		  errorInfo: errorInfo,
+		});
+		// You can also log error messages to an error reporting service here
+	  }
+
+	  render() {
+		if (this.state.errorInfo) {
+		  // Error path
+		  return (
+			<React.Fragment>
+			  <h5>Sorry. Withdrawal amount is greater than account balance</h5>
+			  <details style={{ whiteSpace: "pre-wrap" }}>
+				{this.state.error && this.state.error.toString()}
+				<br />
+				{this.state.errorInfo.componentStack}
+			  </details>
+			</React.Fragment>
+		  );
+		}
+		// if no error, just render children
+		return this.props.children; // here children will refer to Child component, Account.
+	  }
+	}
+
+
+3. Create Wrapper, that will call the EB+Account combo and add it to navigation with path 'error'
+	import React from "react";
+	import AccErrorHandler from "./AccErrorHandler";
+	import Account from "./Account";
+
+	export default class Wrapper extends React.Component {
+	  render() {
+		return (
+		  <React.Fragment>
+			<h3>Error Boundaries in React</h3>
+			<p className="lead">
+			  Click on the button to withdraw amount. The component is programmed to
+			  throw an error when withdraw amount is &gt; account balance.
+			</p>
+			<AccErrorHandler>
+			  <Account />
+			</AccErrorHandler>
+			<hr />
+			<p className="lead">
+			  Sometimes you might want to reuse the error boundary for other
+			  components. It is better for each component to have individual error
+			  boundary when you reuse. These two Accounts are each inside of their
+			  own error boundary. So even if one crashes, the other is not affected.
+			</p>
+			<AccErrorHandler>
+			  <Account />
+			</AccErrorHandler>
+			<AccErrorHandler>
+			  <Account />
+			</AccErrorHandler>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+Where to Place Error Boundaries
+-------------------------------
+The granularity of error boundaries is up to you. You may wrap top-level route components to display a “Something went wrong” message to the user, just like how server-side frameworks often handle crashes. You may also wrap individual widgets in an error boundary to protect them from crashing the rest of the application.
+
+Before I forget, if you need to catch an error inside an event handler, use the regular JavaScript try / catch statement, instead of EB.

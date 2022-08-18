@@ -1,0 +1,179 @@
+Updating phase
+++++++++++++++
+A component is updated whenever there is a change in the component's state or props. React has five built-in methods that gets called, in this order, when a component is updated:
+	a.static getDerivedStateFromProps(props, state){...}
+		is the first method that is called when a component gets updated. Like in Mounting phase, is used to set state based on received props. E.g.,
+			
+	b.shouldComponentUpdate(newProps, newState){...}
+		in this method you can return a Boolean value that specifies whether React should continue with the rendering or not, in case of change in props or state. The default value is true.
+
+	c.render(){...}
+		is called again when a component gets updated. Re-renders the HTML to the DOM, with the new changes.
+	
+	d.getSnapshotBeforeUpdate(prevProps, prevState){...}
+		this method is called immediately after the render and before the changes are committed to the DOM. It gives access to the previous props and state even after the update. If getSnapshotBeforeUpdate() is present, you should use the componentDidUpdate() method, otherwise you will get an error. Oh and this is a rarely used method.
+	
+	e.componentDidUpdate(prevProps, prevState, snapshot){...}
+		is called after the component is updated in the DOM. This is an optional method unless getSnapshotBeforeUpdate() is used in the component.
+	
+You know what comes next.
+
+1. Add some buttons to LCTester as shown below:
+	import React, { Component } from "react";
+
+	export default class LCTester extends Component {
+	  ...
+
+	  // event handlers
+	  changeToGreen = () => {
+		this.setState({ favoritecolor: "Green" });
+	  };
+
+	  changeToGrey = () => {
+		this.setState({ favoritecolor: "Grey" });
+	  };
+
+	  changeToBlue = () => {
+		this.setState({ favoritecolor: "Blue" });
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<p>Favorite Color (child) : {this.state.favoritecolor}</p>
+			<button type="button" className="m-1 btn btn-outline-success" onClick={this.changeToGreen}>
+			  Green
+			</button>
+			<button type="button" className="m-1 btn btn-outline-secondary" onClick={this.changeToGrey}>
+			  Grey
+			</button>
+			<button type="button" className="m-1 btn btn-outline-primary" onClick={this.changeToBlue}>
+			  Blue
+			</button>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+Can you guess the output?
+Even after clicking the buttons, the output remains the same. Ouch...
+
+Why? Even though each button updates state with favorite color, getDerivedStateFromProps(){...} is implicitly called after each updation, and favorite color is, again, overwritten from props, as "Yellow". Hence it is recommended to avoid getDerivedStateFromProps(), unless absolutely necessary as it causes rerendering for every change.
+
+
+2. Remove the getDerivedStateFromProps() method and try again. You will see that button works now, but Child component, displays 'Red' instead of 'Yellow' from props, on launch. Ouch Ouch...
+
+
+3. Update LCTester as shown below:
+	import React, { Component } from "react";
+
+	export default class LCTester extends Component {
+	  constructor(props) {
+		super(props);
+		this.state = { favoritecolor: this.props.favcol, secondsElapsed: 0 };
+	  }
+
+	  ...
+
+	  render() {
+		return (
+		  ...
+		);
+	  }
+	}
+
+Launch value is fine now. But it is not a good practice to initialize state using props, as it is against React Patterns. Any suggestions? 
+
+
+4. Update LCTester to:
+	import React, { Component } from "react";
+
+	export default class LCTester extends Component {
+	  constructor(props) {
+		super(props);
+		this.state = { favoritecolor: "" };
+	  }
+
+	  ...
+
+	  // set state here
+	  componentDidMount() {
+		this.setState({ favoritecolor: this.props.favcol });
+	  }
+
+	  render() {
+		return (
+		  ...
+		);
+	  }
+	}
+
+Now we are following React patterns. Also remember that for each updation, render() will be called.
+	
+	
+5. Suppose you want to prevent the rerendering of component for certain condition, e.g., for state change to 'Blue'. You can use shouldComponentUpdate() for this.
+	import React, { Component } from "react";
+
+	export default class LCTester extends Component {
+	  ...
+	  componentDidMount() {
+		this.setState({ favoritecolor: this.props.favcol });
+	  }
+
+	  shouldComponentUpdate(newProps, newState) {
+		// prevent updation for state change to "Blue"
+		if (newState.favoritecolor === "Blue") return false;
+
+		else return true;
+	  }
+
+	  render() {
+		return (
+		  ...
+		);
+	  }
+	}
+
+NOTE: shouldComponentUpdate() must always have a condition
+
+
+6. What if you want to log changes or reposition the view based on changes? You can use getSnapshotBeforeUpdate() for that.
+	import React, { Component } from "react";
+
+	export default class LCTester extends Component {
+	  ...
+	  
+	  getSnapshotBeforeUpdate(prevProps, prevState) {
+		console.log(
+		  "Just before commiting DOM update. Old value: " + prevState.favoritecolor
+		);
+		return null;
+	  }
+
+	  // must be used if getSnapshotBeforeUpdate(...) is used
+	  componentDidUpdate(prevProps, prevState, snapshot) {
+		console.log("Component successfully updated");
+	  }
+
+	  render() {
+		return (
+		  ...
+		);
+	  }
+	}
+
+
+Check the console. You should see the old values displayed each time the component is rendered. You will see it too many times actually. Triple Ouch situation...
+
+	
+7. The issue you have now is that even though the change (secondsElapsed) is happening in Parent Tester, Child LCTester is being updated along with it, albeit there is no change in props received. If this component was complex, it could cause performance issues. You can use 'memo' to keep the Child component from needlessly re-rendering. 
+	import React, { Component, memo } from "react";
+
+	class LCTester extends Component {
+	  ...
+	}
+
+	// wrap Child component export in memo
+	export default memo(LCTester);
+
+Check the console. Now you have achieved inner peace, atleast, temporarily 

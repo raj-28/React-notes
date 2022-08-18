@@ -1,0 +1,329 @@
+Hooks in React
+==============
+
+Added from React 16.8, Hooks, which are JS functions, allow function components to have access to state and other React features. Some of the hooks available in React are
+	useState()
+	useEffect()
+	useContext()
+	
+useState()
+++++++++++
+This hook is used to add or initialize state value within a functional component. It is equivalent to this.state statement of Class component which is used to initialize the state value. This hook helps to preserve the state value of a component.
+
+It accepts an initial state and returns two values:
+    the current state
+    a function that updates the state
+e.g., 
+	const [name, setName] = useState("Nevil");		//ES6 destructuring syntax, names can be anything
+	
+Always use the setName(...) to update the state name. e.g.,
+	const handleChange = (event) => {
+		// updating state variable
+		setName(event.target.value);
+	  };
+
+1. Create 
+	a. component UseState1, under components\hooks
+		import React, { useState } from "react";
+
+		export default function UseState1() {
+		  // state variablae and the set method with initialization in a single line
+		  // ES6 destructuring syntax
+		  const [empname, setName] = useState("Nevil");
+
+		  return (
+			<React.Fragment>
+			  <h3>useState Demo</h3>
+			  <form className="m-2 p-2">
+				<div className="form-group">
+				  <label htmlFor="txtinput">Name: </label>
+				  <input
+					type="text"
+					id="txtinput"
+					name="empname"
+					className="form-control"
+					placeholder="Your name"
+					value={empname}
+					onChange={(event) => setName(event.target.value)}
+				  ></input>
+				</div>
+			  </form>
+			  <p className="m-2 p-2">
+				Entered Value: <em>{empname} </em>
+			  </p>
+			</React.Fragment>
+		  );
+		}
+
+	Observe how onChange is handled with implicit handler. Although you can have an explicit handler, it is easier to do it this way.
+	
+	b. HooksWrapper.js and add it to navigation with path 'hooks'
+	import React from "react";
+	import UseState1 from "./UseState1";
+
+	export default class HooksWrapper extends React.Component {
+	  render() {
+		return (
+		  <React.Fragment>
+			<h2>React Hooks</h2>
+			<article className="m-1 border border-secondary rounded">
+			  <UseState1 />
+			</article>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+2. If you want to store two different values in state, you should call useState() twice
+	import React, { useState } from "react";
+
+	export default function UseState1() {
+	  // 2 state variables, hence useState(...) called twice
+	  const [empname, setName] = useState("Nevil");
+	  const [empsalary, setSalary] = useState(10000);
+
+	  return (
+		<React.Fragment>
+		  <h3>useState Demo</h3>
+		  <form className="m-2 p-2">
+			<div className="form-group">
+			  <label htmlFor="txtinput">Name: </label>
+			  <input
+				type="text"
+				id="txtinput"
+				name="empname"
+				className="form-control"
+				placeholder="Your name"
+				value={empname}
+				onChange={(event) => setName(event.target.value)}
+			  ></input>
+			</div>
+			<div className="form-group">
+			  <label htmlFor="txtinput">Salary: </label>
+			  <input
+				type="number"
+				id="idinput"
+				name="empsalary"
+				className="form-control"
+				placeholder="Your salary"
+				value={empsalary}
+				onChange={(event) => setSalary(event.target.value)}
+			  ></input>
+			</div>
+		  </form>
+		  <p className="m-2 p-2">
+			<strong>Entered Value:</strong> <br />
+			<em>Name : {empname} </em> <br />
+			<em>Salary : {empsalary} </em> <br />
+		  </p>
+		</React.Fragment>
+	  );
+	}
+
+Observe the benefit of implicit handling of onChange. Else you would have had to declare multiple event handlers. 
+
+
+3. State variables can hold objects and arrays just fine, so you can group related data together. Consider the code below:
+	import React, { useState } from "react";
+
+	export default function UseState1() {
+	  const [emp, setEmp] = useState({		// state initialized to object
+		empname: "Nevil",
+		designation: "Lead",
+		empsalary: 10000,
+	  });
+	  return (
+		<React.Fragment>
+		  <h3>useState Demo</h3>
+		  <p className="m-2 p-2">
+			<strong>Employee Details:</strong>
+		  </p>
+		  <p className="m-2 p-2">
+			Name :<em> {emp.empname} </em> <br />
+			Designation :<em> {emp.designation} </em> <br />
+			Salary : <em>{emp.empsalary}</em>
+		  </p>
+		  <form className="m-2 p-2">
+			<div className="form-group">
+			  <label htmlFor="txtinput">New Salary: </label>
+			  <input
+				type="number"
+				id="idinput"
+				name="empsalary"
+				className="form-control"
+				placeholder="Your salary"
+				value={emp.empsalary}
+				onChange={(event) => setEmp({ empsalary: event.target.value })}
+			  ></input>
+			</div>
+		  </form>
+		</React.Fragment>
+	  );
+	}
+
+What happened when you changed Salary?
+
+
+4. Unlike this.setState in a class, updating a state variable always replaces it instead of merging it. Use the JavaScript spread operator to programmatically merge the state variable
+	import React, { useState } from "react";
+
+	export default function UseState1() {
+	  const [emp, setEmp] = useState({
+		empname: "Nevil",
+		designation: "Lead",
+		empsalary: 10000,
+	  });
+	  return (
+		<React.Fragment>
+		  <h3>useState Demo</h3>
+		  <p className="m-2 p-2">
+			<strong>Employee Details:</strong>
+		  </p>
+		  <p className="m-2 p-2">
+			Name :<em> {emp.empname} </em> <br />
+			Designation :<em> {emp.designation} </em> <br />
+			Salary : <em>{emp.empsalary}</em>
+		  </p>
+		  <form className="m-2 p-2">
+			<div className="form-group">
+			  <label htmlFor="txtinput">New Salary: </label>
+			  <input
+				type="number"
+				id="idinput"
+				name="empsalary"
+				className="form-control"
+				placeholder="Your salary"
+				value={emp.empsalary}
+				onChange={(event) =>
+				  setEmp((previousState) => {
+					return { ...previousState, empsalary: event.target.value };
+				  })
+				}
+			  ></input>
+			  {/* observe the use of previousState with '...' to preserve the state */}
+			</div>
+		  </form>
+		</React.Fragment>
+	  );
+	}
+	
+	
+5. Create a component AddEmployee in the folder as shown:
+	import React, { useState } from "react";
+
+	export default function AddEmployee({ addEmployee }) {
+	  // state variables
+	  const [empname, setName] = useState("");
+	  const [designation, setDesignation] = useState("");
+	  const [empsalary, setSalary] = useState(0);
+
+	  const handleSubmit = (e) => {
+		e.preventDefault();
+
+		// populate employee object with data
+		const newEmployee = {
+		  empname: empname,
+		  designation: designation,
+		  empsalary: empsalary,
+		};
+		addEmployee(newEmployee); // passing data to parent
+		// reset input fields
+		setName("");
+		setDesignation("");
+		setSalary(0);
+	  };
+
+	  return (
+		<form className="m-2 p-2" onSubmit={handleSubmit}>
+		  <div className="form-group">
+			<label htmlFor="txtinput">Name: </label>
+			<input
+			  type="text"
+			  id="idinput"
+			  name="empname"
+			  className="form-control"
+			  placeholder="Your name"
+			  value={empname}
+			  onChange={(event) => setName(event.target.value)}
+			></input>
+		  </div>
+		  <div className="form-group">
+			<label htmlFor="txtinput">Designation: </label>
+			<input
+			  type="text"
+			  id="idinput"
+			  name="designation"
+			  className="form-control"
+			  placeholder="Your name"
+			  value={designation}
+			  onChange={(event) => setDesignation(event.target.value)}
+			></input>
+		  </div>
+		  <div className="form-group">
+			<label htmlFor="txtinput">Salary: </label>
+			<input
+			  type="text"
+			  id="idinput"
+			  name="empsalary"
+			  className="form-control"
+			  placeholder="Your name"
+			  value={empsalary}
+			  onChange={(event) => setSalary(event.target.value)}
+			></input>
+		  </div>
+		  <div className="form-group">
+			<input type="submit" className="btn btn-primary" value="Add Employee" />
+		  </div>
+		</form>
+	  );
+	}
+
+This component will display a form that will accept values to add a new Employee
+
+
+6. Update UseState1 as shown
+	import React, { useState } from "react";
+	import AddEmployee from "./AddEmployee";
+
+	export default function UseState1() {
+	  const [employees, setEmployees] = useState([
+		{ empname: "John", designation: "SE", empsalary: 4000 },
+		{ empname: "Tom", designation: "SSE", empsalary: 6000 },
+		{ empname: "Kevin", designation: "TA", empsalary: 8000 },
+	  ]);
+	  const addEmployee = (newEmployee) => {
+		// ... used to preserve existing values in array
+		setEmployees([...employees, newEmployee]);
+	  };
+	  return (
+		<React.Fragment>
+		  <h3>useState Demo</h3>
+		  <p className="m-2 p-2">
+			<strong>Employee Details:</strong>
+		  </p>
+		  <table className="table table-bordered table-striped">
+			<thead className="thead-dark">
+			  <tr>
+				<th>Name</th>
+				<th>Designation</th>
+				<th>Salary</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  {employees.map((employee, index) => {
+				return (
+				  <tr key={index}>
+					<td>{employee.empname}</td>
+					<td>{employee.designation}</td>
+					<td>{employee.empsalary}</td>
+				  </tr>
+				);
+			  })}
+			</tbody>
+		  </table>
+		  <AddEmployee addEmployee={addEmployee} />{" "}
+		  {/** calling child with method prop */}
+		</React.Fragment>
+	  );
+	}

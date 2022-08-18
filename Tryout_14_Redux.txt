@@ -1,0 +1,116 @@
+Redux
+=====
+Redux is a pattern and library for managing and updating application state globally. It serves as a centralized store for state used across the entire application. It uses 'Actions' to ensure that that the state can only be updated in a predictable fashion. 
+
+Redux is more useful when:
+    Multiple states needed in many places in the application
+    Application state is updated frequently over time
+    Logic to update state may be complex
+    Application has a medium or large codebase and might be worked on by multiple developers
+Note: Redux expects that all state updates are done immutably. This means that whenever you need to update state, you have to first create a copy of it and then update it, either using 'spread' operator or assign()
+
+Actions​
+-------
+An action, mentioned before, is a plain JavaScript object that has a 'type' field. It is similar to an event that describes what happened in the application. 
+The type field should be a string that gives this action a descriptive name, like "todos/todoAdded". You may write type string like "domain/eventName", where the first part is the feature or category that this action belongs to, and the second part is the specific thing that happened.
+An action object can have other fields with additional information about what happened. By convention, that information is put in a field called payload. e.g., 
+	const incrementAction = {
+		type: "INCREMENT", // type of Action
+		payload: {
+		  // data passed as part of Action
+		  data: step,
+		}
+	}
+
+Action Creators​
+---------------
+It is a function that creates and returns an action object. e.g.,  
+	const Increment = (step) => {
+	  //return the action object
+	  return {
+		type: "INCREMENT",
+		payload: {
+		  data: step,
+		},
+	  };
+	}
+
+Reducers​
+--------
+It is a function that receives the current state and an action object, decides how to update the state if necessary, and returns the new state: 
+	(state, action) => newState. 
+Reducer is a listener to the received action and acts based on its type. It must always follow these specific rules:
+    -should only calculate the new state value based on the state and action arguments
+    -should NOT modify the existing state. Instead, they must make immutable updates, by copying the existing state and making changes to the copied values.
+    -must NOT do any asynchronous logic and must perform predictable operations
+Thus, logic inside reducer functions typically follows the same series of steps:
+    -Check whether the reducer cares about this action
+        If yes, make a copy of the state, update the copy with new values, and return it
+    -Otherwise, return the existing state unchanged
+Reducers can use any kind of logic inside to decide what the new state should be: if/else, switch, loops etc. e.g.,
+	const initialState = { count: 0 }; // state is immuatble, hence initialised as const
+	var reducer = (state = initialState, action) => {
+	  //check whether the reducer cares about this action
+	  switch (action.type) {
+		// if yes
+		case "INCREMENT":
+		  //make a copy of the state
+		  return Object.assign(
+			{},
+			state,
+			//update the copy with new values
+			{ count: state.count + action.payload.data }
+		  );
+
+		...
+
+		//otherwise, return the existing state unchanged
+		default:
+		  return state;
+	  }
+	};
+
+Store
+-----
+It is the object where the current Redux application state lives. Store is created by passing in a reducer, and has a method called getState that returns the current state value. e.g.,
+	import { createStore } from "redux";
+	import reducer from "./reducers/reducer";
+
+	var store = createStore(reducer);
+	console.log(store.getState())
+
+Dispatch​
+--------
+This method belongs to the Redux Store. The only way to update Redux state is to call store.dispatch() and pass in an action object. The store will run its reducer function and save the new state value inside, and we can call getState() to retrieve the updated value:
+	store.dispatch({ type: 'INCREMENT', payload: {data: 1} })
+	console.log(store.getState())
+	// {value: 1}
+Dispatching actions are like triggering an event in the application. Something happened, and store should know about it. Reducers act like event listeners, and when they hear an action they are interested in, they update the state in response. Call 'action creators' to dispatch the action uniformly within the application:
+    store.dispatch(Increment(1))
+    console.log(store.getState())
+    // {value: 2}
+	
+Selectors​
+---------
+They are functions that know how to extract specific pieces of information from a store's state. As an application grows bigger, this can help avoid repeating logic as different parts of the app need to read the same data:
+	const selectCount = state => state.count	// returns count value from state, i.e, a subset of state
+	const currentCount = selectCount(store.getState())
+	console.log(currentValue)
+	// 2
+They can be used by other methods in React app.
+	
+Data flow in a redux application
+++++++++++++++++++++++++++++++++
+Initial setup
+-------------
+	-A Redux store is created using a root reducer function
+	-The store calls the root reducer once, and saves the return value as its initial state
+	-When the UI is first rendered, UI components access the current state of the Redux store, and use that data to decide what to render. They also subscribe to any future store updates so they can know if the state has changed.
+Updates
+-------
+	-Something happens in the app, such as a user clicking 'increment' button
+	-The app code dispatches an action to the Redux store, like dispatch({type: 'INCREMENT'})
+	-The store runs the reducer function again with the previous state and the current action, and saves the return value as the new state
+	-The store notifies all parts of the UI that are subscribed that the store has been updated
+	-Each UI component that needs data from the store checks to see if the parts of the state they need have changed.
+	-Each component that sees its data has changed forces a re-render with the new data, so it can update what's shown on the screen

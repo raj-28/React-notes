@@ -1,0 +1,74 @@
+Props in React
+==============
+In real time scenario, component will not directly have data to be displayed. It will rather receive it uand then display the same. In React, this can be done using Props. The caller passes data as an attribute to the component and the component accesses it using props.attribute or this.props.attribute [component as a class]
+
+1. Generally, App acts as the store for data. How will you pass data from App to Header?
+Modify App.js to
+	...
+	function App() {
+	  const appTitle = "React Kitchen Sink"; // data in parent
+	  return (
+		<React.Fragment>
+		  <Header appTitle={appTitle} /> {/* pass data as attribute to child */}
+		  <Navigation />
+	  ...
+
+	}
+	
+	
+2. Update Header.js to:
+	export default function Header(props) {
+	  return (
+		<div className="p-2">
+		  <header className="border border-secondary rounded">
+			<h1 className="text-center text-primary">{props.appTitle}</h1>
+			...		
+	}
+	
+Observe:
+	Props allow you to pass data from the parent component to the child component.
+	Props are immutable - a component cannot change its props however it is responsible for putting together.
+
+3. To see how props are handled in component as a class, create component Child inside component\props (just to know code modularization)
+	import React from "react";
+
+	export default class Child extends React.Component {
+	  constructor(props) {
+		super(props);
+	  }
+	  render() {
+		return (
+		  <React.Fragment>
+			<h2>In Child</h2>
+			<p>Value received from Parent: {this.props.valuePassed}</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+Observe: 
+	Props are arguments passed into React components via HTML attributes.
+	It is a good practice to use parameterised constructor-super combo with props.
+	React Props are read-only. You will get an error if you try to change their value.
+
+4. Create component Parent in same folder with code as shown:
+	import React from "react";
+	import Child from "./Child";
+
+	export default class Parent extends React.Component {
+	  render() {
+		let valueToPass = "Hello from Parent";
+		return (
+		  <React.Fragment>
+			<h2>Props Demo</h2>
+			<h3>In Parent</h3>
+			<p>Value in Parent: {valueToPass}</p>
+			<Child valuePassed={valueToPass}></Child>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+5. Add Parent to navigation. Save and check th output.

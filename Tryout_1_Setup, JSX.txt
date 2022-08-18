@@ -1,0 +1,33 @@
+React JS Setup
+==============
+What if you want to create a React application from the scratch?
+
+1. You can use Create React app using npm
+	npx create-react-app kitchen-sink
+			or
+	npm install -g create-react-app@17
+	create-react-app kitchen-sink
+   
+   The above commands
+    create a live development server, 
+	use Webpack to automatically compile React, JSX, and ES6, 
+	auto-prefix CSS files, and 
+	use ESLint to test and warn about mistakes in the code
+   
+2. Once that finishes installing, move to the newly created directory and start the project.
+	cd my-app
+	npm start
+   
+Once you run this command, a new window will popup at localhost:3000 with your new React app.
+
+Files and Folders
+-----------------
+Inside the project structure, you’ll see 
+	/public and /src directory
+	regular node_modules, .gitignore, README.md, and package.json.
+
+The /src directory will contain all our React code. In /public, our important file is index.html, which is very similar to the static index.html file we made earlier – just a root div. This time, no libraries or scripts are being loaded in. 
+
+Have a look at index.js and App.js files.
+
+Once you edit and save the files, localhost:3000 compiles and refreshes with the new data --> hot reload.

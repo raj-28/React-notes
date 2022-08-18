@@ -1,0 +1,131 @@
+More about React Components
+===========================
+
+Although finally you need the js code in one file, you can't put the entire code in index.js during development. Splitting up the code into smaller peices ensures better maintainability, flexibility and reuse. But how to split up the code?  
+
+Enter Components
+----------------
+Components let you split the UI into independent, reusable pieces, and think about each piece in isolation. The HTML portion you want to display can be packaged inside a component and used as you see fit :). Thus it is the basic building block of a react application.
+
+It is recommended to have a component App.js which will act as the container component. This component will be called by index.js and will be in the same folder.
+
+1. Observe code in index.js
+	import React from 'react';
+	import ReactDOM from 'react-dom';
+	import './index.css';
+	import App from './App';
+	import reportWebVitals from './reportWebVitals';
+
+	ReactDOM.render(
+	  <React.StrictMode>
+		<App />
+	  </React.StrictMode>,
+	  document.getElementById('root')
+	);
+	reportWebVitals();
+	
+	
+2. Update code in App.js to:
+	import React from "react";
+
+	class App extends React.Component {		// component as a class
+	  render() {
+		return (
+		  <header>
+			<h1>React Kitchen Sink</h1>
+		  </header>
+		);
+	  }
+	}
+	
+
+3. You can also have component as a function in React. Update code in App.js to:
+	function App() {
+	  return (
+		<header>
+		  <h1>React Kitchen Sink</h1>
+		</header>
+	  );
+	}
+
+	export default App;	
+
+In newer versions of React, component as a function is preferred over component as a class. Hence in most of the tryouts, you will see more of component as a function. 
+
+4. You can apply styles locally as shown below:
+	function App() {
+	  return (
+		<header>
+		  <h1 style={{ textAlign: "center" }}>React Kitchen Sink</h1>
+		</header>
+	  );
+	}
+
+	export default App;
+
+
+5. What if you try to render multiple components?
+	function App() {
+	  return (
+		<header>
+		  <h1 style={{ textAlign: "center" }}>React Kitchen Sink</h1>
+		</header>
+		<p>Hello from React</p>
+	  );
+	}
+	...
+
+You should get a compiltion error as React render can return only a single element. So how will you handle this situation? You can 
+	a. either wrap the return code iside a <div>
+		function App() {
+		  return (
+			<div>
+			  <header>
+				<h1 style={{ textAlign: "center" }}>React Kitchen Sink</h1>
+			  </header>
+			  <p>Hello from React</p>
+			</div>
+		  );
+		}
+		...
+		
+	b. As the above code will result in unnecessary <div>'s in final html page, it is better to use <React.Fragments> as shown:
+		import React from "react";
+
+		function App() {
+		  return (
+			<React.Fragment>
+			  <header>
+				<h1 style={{ textAlign: "center" }}>React Kitchen Sink</h1>
+			  </header>
+			  <p>Hello from React Fragment. No more unnessary divs</p>
+			</React.Fragment>
+		  );
+		}
+		...
+
+
+6. Separation of Concerns
+We have said before that application should be split into components and that <App> is going to act as the Container component. So let's put header related code inside <Header>.
+As per coding standards, all components should be kept inside a 'components' folder. So 
+	a. create components folder inside src 
+	b. create Header.js under components with below code
+		export default function Header() {
+		  return (
+			<header>
+			  <h1 style={{ textAlign: "center" }}>React Kitchen Sink</h1>
+			</header>
+		  );
+		}
+	
+	c. call it in App.js
+		export default function Header() {
+		  return (
+			<header>
+			  <h1 style={{ textAlign: "center" }}>React Kitchen Sink</h1>
+			</header>
+		  );
+		}
+		
+		
+7. Now create a Footer and call it from App.js

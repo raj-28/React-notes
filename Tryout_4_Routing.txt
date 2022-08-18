@@ -1,0 +1,235 @@
+Routing in React
+================
+Technically, React applications are Single Page Applications (SPA's). Nevertheless, you can use ReactRouter library to display different views to the user and navigate between them.
+
+PS: In case you are wondering why we need another library, remember that React is a library whose only focus is to display data you provide quickly and efficiently. Anything else, will require additional packages.
+
+1. install react-router-dom with your project
+	npm install react-router-dom	
+	
+NOTE: for react-router-dom v5, go through lex content. For the latest v6, continue.
+	
+2. create 2 components as shown below
+	a. Home.js
+		import React from "react";
+
+		export default function Home() {
+		  return (
+			<React.Fragment>
+			  <h2>Welcome to React 17 Demo App</h2>
+
+			  <p>
+				Click on each of the links to see the demo of the particular concept.
+				You can then check each component code to see how they have to be used.
+			  </p>
+
+			  <p>
+				<span className="text-warning">NOTE: </span>At this point the app already
+				uses:
+			  </p>
+			  <ol className="list-group">
+				<li className="list-group-item">Components </li>
+				<li className="list-group-item">Component hierarchy</li>
+				<li className="list-group-item">React Fragments</li>
+				<li className="list-group-item">Bootstrap</li>
+				<li className="list-group-item">Routing</li>
+			  </ol>
+			</React.Fragment>
+		  );
+		}
+	
+	b. JSXExpressions.js
+		import React from "react";
+
+		const JSXExpressions = () => {
+		  return (
+			<React.Fragment>
+			  <h2>JSXExpressions Demo</h2>
+			</React.Fragment>
+		  );
+		};
+
+		export default JSXExpressions;
+		
+
+3. Create a component Navigation.js. We will add our Navigation specific code here and call it from App.js
+
+4. In Navigation.js, import the required classes from react-router-dom
+	import { BrowserRouter as Router, NavLink, Routes, Route } from "react-router-dom";
+	
+BrowserRouter 	-->	This fellow will wrap all navigation related elements. It also has access to Browser's
+					history. We will give it an alias 'Router' for readability.
+NavLink			-->	is used to mention the hyperlinks, <NavLink to="path" >text</NavLink>
+						e.g., <NavLink to="home">Home</NavLink>
+					The browser url will have this path.
+Routes			-->	All Routes are wrapped inside Routes. Based on the url, components are switched out
+Route			--> used to map component to the path
+						<Routes>
+						  <Route path="/home" element={<Home />} />
+						  <Route path="/jsxexpressions" element={<JSXExpressions />} />
+						</Routes>
+ 
+
+
+5. First, add the different links using NavLink. Keep in mind 2 things
+	a. <Router> should be the outermost/parent element
+	b. <Router> expects a single child, hence wrap everything else inside <React.Fragment> 
+		...
+		export default function Navigation() {
+		  return (
+			<Router>
+			  <React.Fragment>
+				{/* links for routing*/}
+				<div className="p-2">
+				  <section className="p-1 border border-secondary rounded">
+					<nav className="nav nav-pills nav-justified">
+					  <NavLink to="home" className="nav-link">
+						Home
+					  </NavLink>
+					  <NavLink to="jsxexpressions" className="nav-link">
+						JSXExpressions
+					  </NavLink>
+					</nav>
+				  </section>
+				</div>
+			  </React.Fragment>
+			</Router>
+		  );
+		}
+		
+		
+6. Now add the routing between paths
+	...
+	
+	export default function Navigation() {
+	  return (
+		<Router>
+		  <React.Fragment>
+			{/* links for routing*/}
+			...
+
+			{/* routing between paths */}
+			<div className="p-2">
+			  <section className="p-1 border border-secondary rounded">
+				<Routes>
+				  <Route path="home" element={<Home />} />
+				  <Route path="jsxexpressions" element={<JSXExpressions />} />
+				</Routes>
+			  </section>
+			</div>
+		  </React.Fragment>
+		</Router>
+	  );
+	}
+	
+NOTE:	path: maps to the path given in URL/NavLink. 
+		element: contains component to be rendered when the route is mapped	
+	
+7. Update App.js to
+	...
+
+	function App() {
+	  return (
+		<React.Fragment>
+		  <Header />
+
+		  <Navigation />
+
+		  <Footer />
+		</React.Fragment>
+	  );
+	}
+
+	export default App;
+	
+Save and check the output. Observe that NavLink automatically adds the active class when you click on a link
+
+
+8. Adding default path
+Suppose you want Home component to be the landing view, i.e., when the url is localhost:port, app should redirect/navigate to Home. Modify the routing portion as
+	import React from "react";
+	import {BrowserRouter as Router, NavLink, Routes, Route, Navigate} from "react-router-dom";
+	...
+	
+	export default function Navigation() {
+	  return (
+		<Router>
+		  <React.Fragment>
+			{/* links for routing*/}
+			...
+
+			{/* routing between paths */}
+			<div className="p-2">
+			  <section className="p-1 border border-secondary rounded">
+				<Routes>
+				  <Route path="home" element={<Home />} />
+				  <Route path="jsxexpressions" element={<JSXExpressions />} />
+				  <Route path="" element={<Navigate to="/home" />} />
+				</Routes>
+			  </section>
+			</div>
+		  </React.Fragment>
+		</Router>
+	  );
+	}
+	
+	
+9. 404
+To handle 404 routes in React Router, add a Route without path to the fallback component.
+	a. create a component NotFound, with below code
+		import { NavLink } from "react-router-dom";
+
+		export default function NotFound() {
+		  return (
+			<div className="jumbotron bg-warning">
+			  <h4 className="display-4">404</h4>
+			  <p className="lead">
+				Sorry, we couldn't find the url on our server. We are pretty sure its up
+				and running and hence doesn't look like an issues at our end.
+			  </p>
+			  <hr className="my-4" />
+			  <p>You sure you hit the right url and not typing-under-influence?</p>
+			  <NavLink to="" className="btn btn-info">
+				Go Home
+			  </NavLink>
+			</div>
+		  );
+		}
+		
+	b. update wildcard route to the routing portion, preferrably at the end 
+		...
+		<div className="p-2">
+          <section className="p-1 border border-secondary rounded">
+            <Routes>
+              <Route path="home" element={<Home />} />
+              <Route path="jsxexpressions" element={<JSXExpressions />} />
+              <Route path="" element={<Navigate to="/home" />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </section>
+        </div>
+		...
+
+
+10. Programmatic Navigation
+React Router comes with a useNavigate Hook which gets you access to navigate - React Router’s imperative API for programmatically navigating. Update code of JSXExpressions.js to:
+	import React from "react";
+	import { useNavigate } from "react-router-dom";
+
+	const JSXExpressions = () => {
+	  let navigate = useNavigate();		// assign Hook to local variable 
+	  return (
+		<React.Fragment>
+		  <h2>JSXExpressions Demo</h2>
+		  <button className="btn btn-primary" onClick={() => navigate("/home")}>
+			Go Home
+		  </button>
+		</React.Fragment>
+	  );
+	};
+
+	export default JSXExpressions;
+
+
+NOTE:  Since you won't modify the hook, its better to declare it as const navigate = useNavigate();
+	   It would be useHistory Hook for react-router-dom v5

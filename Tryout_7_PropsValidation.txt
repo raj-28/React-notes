@@ -1,0 +1,207 @@
+Validating PropTypes	(DIY)
+====================
+
+You know how to send props to Child component and how to display those values. But what if Child was prepared to handle a value but Parent did not send it?
+
+1. defaultProps can be used to ensure that this.props.user will have a value if it was not specified by Parent. Modify Child with code as shown:
+	import React, { Component } from 'react';
+	
+	export default class Child extends Component {
+		constructor(props){
+			super(props);
+		}
+
+		// You can define default values for your props by 
+		// assigning to the special defaultProps property
+		static defaultProps = {
+			user: 'Guest'
+		}
+
+		render() {
+			return (
+				<React.Fragment>
+					<h3>In Child</h3>
+					<p className="text-primary">Welcome {this.props.user}</p>
+					<p>Remove <em>user</em> from Parent and recheck the output </p>
+					<br />
+				</React.Fragment>
+			)
+		}
+	}
+
+
+2. Modify Parent to: 
+	import React, { Component } from 'react'
+	import Child from './Child';
+
+	export default class Parent extends Component {
+		render() {
+			let uname = "Nevil";
+			return (
+				<React.Fragment>
+					<h2>In Parent</h2>
+					<hr />
+					<Child user={uname}></Child>
+				</React.Fragment>
+			)
+		}
+	}		
+ 
+		
+3. As app grows, typechecking is must for debugging, especially for the received props.React has some built-in typechecking abilities. Modify code in Parent to
+	import React, { Component } from 'react'
+	import Child from './Child';
+
+	export default class Parent extends Component {
+		render() {
+			let uname = "Nevil";
+			let stringToPass = "Hogwarts School of Witchcraft and Wizardry"
+			return (
+				<React.Fragment>
+					<h2>In Parent</h2>
+					<hr />
+					<Child user={uname} school={stringToPass}></Child>
+				</React.Fragment>
+			)
+			
+		}
+	}
+
+
+4. Use prop-types library for React prop typechecking within the project
+	npm install prop-types
+
+
+5. Modify code in Child to:
+	import React, { Component } from 'react';
+	import { PropTypes } from "prop-types";
+
+	export default class Child extends Component {
+		constructor(props){
+			super(props);
+		}
+
+		// You can define default values for your props by 
+		// assigning to the special defaultProps property
+		static defaultProps = {
+			user: 'Guest'
+		}
+
+		static propTypes = {
+			// You can declare that a prop is a specific JS type. 
+			// By default, these all props are optional.
+			school: PropTypes.string
+		};
+
+		render() {
+			return (
+				<React.Fragment>
+					<h3>In Child</h3>
+					<p className="text-primary">Welcome {this.props.user}</p>
+					<p>Replace {"<Child user={uname}></Child>"} to {"<Child></Child>"} in Parent and recheck the output </p>
+					<br />
+					<h4>Values received from Parent:</h4>
+					<li>School : {this.props.school}</li>
+				</React.Fragment>
+			)
+		}
+	}
+
+
+6. Check the output. Nothing special there. It is as expected.
+
+
+7. Update value of stringToPass in Parent to
+	...
+		stringToPass = 1
+	...
+	
+Check the output. School will now display 1, as you would expect. But if you check the console, you will see-
+	Warning: Failed prop type: Invalid prop `school` of type `number` supplied to `Child`, expected `string`.
+	
+
+8. You can do more with PropTypes. For instance, update Parent.js as shown:
+	...
+		render() {
+			let uname = "Nevil";
+			let stringToPass = "Hogwarts School of Witchcraft and Wizardry";
+			let numberToPass = 990;
+			let arrayToPass = ["Gryffindor","Hufflepuff","Ravenclaw","Slytherin"];
+			let stringCheck = "Scotland";
+			let objectToPass = {
+				name : "Harry Potter",
+				rollno: 97484,
+				year:"First",
+				house: "Gryffindor"
+			}
+			return (
+				<React.Fragment>
+					<h2>In Parent</h2>
+					<hr />
+					<Child 
+						user={uname} school={stringToPass} founded={numberToPass} 
+						houses={arrayToPass} location={stringCheck} student={objectToPass}
+					>
+					</Child>
+				</React.Fragment>
+			)
+		}
+	...
+	
+	
+9. Update code in Child to:
+	import React, { Component } from 'react';
+	import { PropTypes } from "prop-types";
+
+	export default class Child extends Component {
+		constructor(props){
+			super(props);
+		}
+
+		// You can define default values for your props by 
+		// assigning to the special defaultProps property
+		static defaultProps = {
+			user: 'Guest'
+		}
+
+		static propTypes = {
+			// You can declare that a prop is a specific JS type. 
+			// By default, these all props are optional.
+			school: PropTypes.string,
+			student: PropTypes.object,
+			
+			// An array of a certain type
+			houses: PropTypes.arrayOf(PropTypes.string),
+
+			// You can ensure that  prop is limited to specific values by treating
+			// it as an enum.
+			location: PropTypes.oneOf(['Scotland', 'Great Britain']),
+
+			// You can chain `isRequired` to make sure a warning
+			// is shown if the prop isn't provided
+			founded: PropTypes.number.isRequired
+
+		};
+
+		render() {
+			return (
+				<React.Fragment>
+					<h3>In Child</h3>
+					<p className="text-primary">Welcome {this.props.user}</p>
+					<p>Replace {"<Child user={uname}></Child>"} to {"<Child></Child>"} in Parent and recheck the output </p>
+					<br />
+					<h4>Values received from Parent:</h4>
+					<li>School : {this.props.school}</li>
+					<li>Established in : {this.props.founded} AD</li>
+					<li>Location : {this.props.location}</li>
+					<li>Houses : {this.props.houses.toString()}</li>
+					<li>Student Info of {this.props.student.name} :</li>
+						<ul>
+							<li>Roll No : {this.props.student.rollno}</li>
+							<li>Year : {this.props.student.year}</li>
+							<li>House : {this.props.student.house}</li>
+						</ul>
+				</React.Fragment>
+			)
+		}
+	}

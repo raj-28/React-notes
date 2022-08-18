@@ -1,0 +1,620 @@
+Controlled Components
++++++++++++++++++++++
+
+1. Create ControlledForm.js in components\forms with below code: 
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		};
+	  }
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2">
+			  <h3>Controlled Form</h3>
+			  <div className="form-group">
+				<label htmlFor="txtinput">Name: </label>
+				<input
+				  type="text"
+				  id="txtinput"
+				  name="txtinput"
+				  className="form-control"
+				  placeholder="Your name"
+				  value={this.state.txtinput}
+				></input>
+			  </div>
+			</form>
+			<p className="m-2 p-2">
+			  Entered name: <em> {this.state.txtinput} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+2. Update FormsWrapper to:
+	...
+	export default class FormsWrapper extends React.Component {
+	  render() {
+		return (
+		  <React.Fragment>
+			<h2>Forms in React</h2>
+			...
+			<article className="m-1 border border-secondary rounded">
+			  <ControlledForm />
+			</article>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+See if you can type in the text field. You can't. Why?
+You already know that HTML form elements such as <input>, <textarea>, and <select> typically maintain their own state and update it based on user input. But in React, mutable state is typically kept in the state property of components, and only updated with setState().
+
+While handling input elements using React, React state should act as the “single source of truth”. Otherwise, html form elements state change will be overridden by React component's state. 
+
+In summary, the React component that renders a form also controls what happens in that form on subsequent user input. 
+
+PS: Remember React, by default,allows only unidirectional data flow, i.e., component-->view
+
+
+3. Update the code of ControlledForm as shown
+	...
+	export default class ControlledForm extends React.Component {
+	  ...
+
+	  // update state for every change
+	  handleChange = (event) => {
+		this.setState({ txtinput: event.target.value });
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2" >
+			  <h3>Controlled Form</h3>
+			  <div className="form-group">
+				<label htmlFor="txtinput">Name: </label>
+				<input
+				  type="text"
+				  id="txtinput"
+				  name="txtinput"
+				  className="form-control"
+				  placeholder="Your name"
+				  value={this.state.txtinput}
+				  onChange={this.handleChange}
+				></input>
+			  </div>
+			</form>
+			...
+		  </React.Fragment>
+		);
+	  }
+	}
+	
+	
+4. Textarea can also be handled in a similar way
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		  txtarea: "Trivandrum, Kerala, India",
+		};
+	  }
+
+	  // update state for every change
+	  handleChange = (event) => {
+		this.setState({ txtinput: event.target.value });
+	  };
+
+	  // update state for every change
+	  handleChange2 = (event) => {
+		this.setState({ txtarea: event.target.value });
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2" >
+			  <h3>Controlled Form</h3>
+			  <div className="form-group">
+				<label htmlFor="txtinput">Name: </label>
+				<input
+				  type="text"
+				  id="txtinput"
+				  name="txtinput"
+				  className="form-control"
+				  placeholder="Your name"
+				  value={this.state.txtinput}
+				  onChange={this.handleChange}
+				></input>
+			  </div>
+			  <div className="form-group">
+				<label htmlFor="txtarea">Address: </label>
+				<textarea
+				  className="form-control"
+				  rows="3"
+				  value={this.state.txtarea}
+				  onChange={this.handleChange2}
+				/>
+			  </div>
+			</form>
+			<p className="m-2 p-2">
+			  <strong>Entered Values: </strong> <br />
+			  Name : <em> {this.state.txtinput} </em> <br />
+			  Address : <em> {this.state.txtarea} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+	
+5. Hmm...if my form has 10 elements, do I need 10 handleChange's? NO. Why? You can make it dynamic. 
+How? Doesn't handleChange and handleChange2 look very similar to you? What if like event.target.value, we could find event.target.name? You can. Here is how.
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		  txtarea: "Trivandrum, Kerala, India",
+		  // use same names for form fields
+		};
+	  }
+
+	  // update state for every change
+	  handleChange = (event) => {
+		const fieldName = event.target.name;
+		const fieldValue = event.target.value;
+
+		// use the ES6 computed property name syntax to
+		// update the state key corresponding to field name
+		this.setState({
+		  [fieldName]: fieldValue,
+		});
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2">
+			  <h3>Controlled Form</h3>
+			  <div className="form-group">
+				<label htmlFor="txtinput">Name: </label>
+				<input
+				  type="text"
+				  id="txtinput"
+				  name="txtinput"
+				  className="form-control"
+				  placeholder="Your name"
+				  value={this.state.txtinput}
+				  onChange={this.handleChange}
+				></input>
+			  </div>
+			  <div className="form-group">
+				<label htmlFor="txtarea">Address: </label>
+				<textarea
+				  className="form-control"
+				  rows="3"
+				  name="txtarea"
+				  value={this.state.txtarea}
+				  onChange={this.handleChange}
+				/>
+			  </div>
+			</form>
+			<p className="m-2 p-2">
+			  <strong>Entered Values: </strong> <br />
+			  Name : <em> {this.state.txtinput} </em> <br />
+			  Address : <em> {this.state.txtarea} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+Observe how name attribute has been added to <textarea>. When doing this, each input filed shoud have a name.
+
+
+6. What if you have a select drop down? It can also be handled in a similar way.
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		  txtarea: "Trivandrum, Kerala, India",
+		  slct: "TVM",
+		};
+	  }
+
+	  ...
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2">
+			  <h3>Controlled Form</h3>
+			  ...
+			  <div className="form-group">
+				<label htmlFor="locslct">Pick your location: </label>
+				<select
+				  id="locslct"
+				  className="form-control"
+				  name="slct"
+				  value={this.state.slct}
+				  onChange={this.handleChange}
+				>
+				  <option value="BLR">BLR</option>
+				  <option value="MLR">MLR</option>
+				  <option value="TVM">TVM</option>
+				  <option value="MYS">MYS</option>
+				</select>
+			  </div>
+			</form>
+			<p className="m-2 p-2">
+			  <strong>Entered Values: </strong> <br />
+			  Name : <em> {this.state.txtinput} </em> <br />
+			  Address : <em> {this.state.txtarea} </em> <br />
+			  Location : <em> {this.state.slct} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+	
+	
+7. Now let's handle Radio
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		  txtarea: "Trivandrum, Kerala, India",
+		  slct: "TVM",
+		  rdio: "Male",
+		};
+	  }
+
+	  ...
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2">
+			  ...
+			  <div className="form-group">
+				<label>Gender:</label>
+				<div className="form-check">
+				  <label>
+					<input
+					  type="radio"
+					  name="rdio"
+					  className="form-check-input"
+					  value="Male"
+					  checked={this.state.rdio === "Male"}
+					  onChange={this.handleChange}
+					/>
+					Male
+				  </label>
+				</div>
+				<div className="form-check">
+				  <label>
+					<input
+					  type="radio"
+					  name="rdio"
+					  className="form-check-input"
+					  value="Female"
+					  checked={this.state.rdio === "Female"}
+					  onChange={this.handleChange}
+					/>
+					Female
+				  </label>
+				</div>
+				<div className="form-check">
+				  <label>
+					<input
+					  type="radio"
+					  name="rdio"
+					  className="form-check-input"
+					  value="Other"
+					  checked={this.state.rdio === "Other"}
+					  onChange={this.handleChange}
+					/>
+					Other
+				  </label>
+				</div>
+			  </div>
+			</form>
+			<p className="m-2 p-2">
+			  <strong>Entered Values: </strong> <br />
+			  Name : <em> {this.state.txtinput} </em> <br />
+			  Address : <em> {this.state.txtarea} </em> <br />
+			  Location : <em> {this.state.slct} </em> <br />
+			  Gender : <em> {this.state.rdio} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+8. And a Checkbox
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		  txtarea: "Trivandrum, Kerala, India",
+		  slct: "TVM",
+		  rdio: "Male",
+		  cbox: true,
+		};
+	  }
+
+	  // update state for every change
+	  handleChange = (event) => {
+		const fieldName = event.target.name;
+		let fieldValue ="";
+		if (fieldName === "cbox") 
+			fieldValue = event.target.checked;
+		else
+			fieldValue = event.target.value;
+		// use the ES6 computed property name syntax to
+		// update the state key corresponding to field name
+		this.setState({
+		  [fieldName]: fieldValue,
+		});
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2">
+			  <h3>Controlled Form</h3>
+			  ...
+			  <div className="form-group">
+				<label>Accommodation required:</label>
+				<div className="form-check">
+				  <label>
+					<input
+					  name="cbox"
+					  type="checkbox"
+					  className="form-check-input"
+					  checked={this.state.cbox}
+					  onChange={this.handleChange}
+					/>
+					Yes
+				  </label>
+				</div>
+			  </div>
+			</form>
+			<p className="m-2 p-2">
+			  <strong>Entered Values: </strong> <br />
+			  Name : <em> {this.state.txtinput} </em> <br />
+			  Address : <em> {this.state.txtarea} </em> <br />
+			  Location : <em> {this.state.slct} </em> <br />
+			  Gender : <em> {this.state.rdio} </em>
+			  <br />
+			  Accomodation : <em> {this.state.cbox ? "Yes" : "No"} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+9. Lastly, the submit. Here we will display the Entered values after form submit.
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		  txtarea: "Trivandrum, Kerala, India",
+		  slct: "TVM",
+		  rdio: "Male",
+		  cbox: true,
+		  isSubmitted: false,
+		};
+	  }
+
+	  ...
+
+	  handleSubmit = (event) => {
+		// this must be done to stop page refresh
+		event.preventDefault();
+		this.setState({ isSubmitted: true });
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2" onSubmit={this.handleSubmit}>
+			  ...
+			  <div className="form-group">
+				<input type="submit" className="btn btn-primary" value="Submit" />
+			  </div>
+			</form>
+			<p className={this.state.isSubmitted ? "m-2 p-2" : "d-none"}>
+			  <strong>Entered Values: </strong> <br />
+			  Name : <em> {this.state.txtinput} </em> <br />
+			  Address : <em> {this.state.txtarea} </em> <br />
+			  Location : <em> {this.state.slct} </em> <br />
+			  Gender : <em> {this.state.rdio} </em>
+			  <br />
+			  Accomodation : <em> {this.state.cbox ? "Yes" : "No"} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+10. Final version of ControlledForm for reference
+	import React from "react";
+
+	export default class ControlledForm extends React.Component {
+	  constructor() {
+		super();
+		this.state = {
+		  txtinput: "Nevil",
+		  txtarea: "Trivandrum, Kerala, India",
+		  slct: "TVM",
+		  rdio: "Male",
+		  cbox: true,
+		  isSubmitted: false,
+		};
+	  }
+
+	  // update state for every change
+	  handleChange = (event) => {
+		const fieldName = event.target.name;
+		let fieldValue = event.target.value;
+		if (fieldName === "cbox") fieldValue = event.target.checked;
+
+		// use the ES6 computed property name syntax to
+		// update the state key corresponding to field name
+		this.setState({
+		  [fieldName]: fieldValue,
+		});
+	  };
+
+	  handleSubmit = (event) => {
+		// this must be done to stop page refresh
+		event.preventDefault();
+		this.setState({ isSubmitted: true });
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<form className="m-2 p-2" onSubmit={this.handleSubmit}>
+			  <h3>Controlled Form</h3>
+			  <div className="form-group">
+				<label htmlFor="txtinput">Name: </label>
+				<input
+				  type="text"
+				  id="txtinput"
+				  name="txtinput"
+				  className="form-control"
+				  placeholder="Your name"
+				  value={this.state.txtinput}
+				  onChange={this.handleChange}
+				></input>
+			  </div>
+			  <div className="form-group">
+				<label htmlFor="txtarea">Address: </label>
+				<textarea
+				  className="form-control"
+				  rows="3"
+				  name="txtarea"
+				  value={this.state.txtarea}
+				  onChange={this.handleChange}
+				/>
+			  </div>
+			  <div className="form-group">
+				<label htmlFor="locslct">Pick your location: </label>
+				<select
+				  id="locslct"
+				  className="form-control"
+				  name="slct"
+				  value={this.state.slct}
+				  onChange={this.handleChange}
+				>
+				  <option value="BLR">BLR</option>
+				  <option value="MLR">MLR</option>
+				  <option value="TVM">TVM</option>
+				  <option value="MYS">MYS</option>
+				</select>
+			  </div>
+			  <div className="form-group">
+				<label>Gender:</label>
+				<div className="form-check">
+				  <label>
+					<input
+					  type="radio"
+					  name="rdio"
+					  className="form-check-input"
+					  value="Male"
+					  checked={this.state.rdio === "Male"}
+					  onChange={this.handleChange}
+					/>
+					Male
+				  </label>
+				</div>
+				<div className="form-check">
+				  <label>
+					<input
+					  type="radio"
+					  name="rdio"
+					  className="form-check-input"
+					  value="Female"
+					  checked={this.state.rdio === "Female"}
+					  onChange={this.handleChange}
+					/>
+					Female
+				  </label>
+				</div>
+				<div className="form-check">
+				  <label>
+					<input
+					  type="radio"
+					  name="rdio"
+					  className="form-check-input"
+					  value="Other"
+					  checked={this.state.rdio === "Other"}
+					  onChange={this.handleChange}
+					/>
+					Other
+				  </label>
+				</div>
+			  </div>
+			  <div className="form-group">
+				<label>Accommodation required:</label>
+				<div className="form-check">
+				  <label>
+					<input
+					  name="cbox"
+					  type="checkbox"
+					  className="form-check-input"
+					  checked={this.state.cbox}
+					  onChange={this.handleChange}
+					/>
+					Yes
+				  </label>
+				</div>
+			  </div>
+			  <div className="form-group">
+				<input type="submit" className="btn btn-primary" value="Submit" />
+			  </div>
+			</form>
+			<p className={this.state.isSubmitted ? "m-2 p-2" : "d-none"}>
+			  <strong>Entered Values: </strong> <br />
+			  Name : <em> {this.state.txtinput} </em> <br />
+			  Address : <em> {this.state.txtarea} </em> <br />
+			  Location : <em> {this.state.slct} </em> <br />
+			  Gender : <em> {this.state.rdio} </em>
+			  <br />
+			  Accomodation : <em> {this.state.cbox ? "Yes" : "No"} </em>
+			</p>
+		  </React.Fragment>
+		);
+	  }
+	}

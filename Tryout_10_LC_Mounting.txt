@@ -1,0 +1,132 @@
+Component LifeCycle
+===================
+What does a React component do? In a simple sentence: it describes what to render on the browser. It uses the render() method for this purpose. But what if we want to do something before or after the component has rendered? What if we want to avoid a re-render?
+
+Hmm... We might need more control over the stages that a component goes through. The process where all these stages are involved is called the component’s lifecycle and every React component goes through it. 
+React provides several methods that notify us when certain stage of this process occurs. These methods are called the component’s lifecycle methods and they are invoked in a predictable order. We can override these methods to provide the desired functionality. These methods can be used in the following cases:
+	For making an Ajax call, to set timer and to integrate with other frameworks
+	To avoid unnecessary re-rendering of a component
+	To update the component, based on the props changes
+	For clearing the values when component is unmounted
+
+Every component will have following phases in its lifecycle:
+	Mounting phase - when the component is mounted to DOM tree
+	Updating phase - when component is being updated with new state or new props have been received
+	Unmounting phase - destroying component from DOM tree
+
+
+Mounting phase
+++++++++++++++
+At mounting phase of a component, following methods which will be invoked:
+	a.constructor(){...}
+		is used only for initializing state of a component and for binding event handler methods to an instance
+	
+	b.static getDerivedStateFromProps(props, state){...}
+		is invoked right before the render(). It is used to update the state of a child component based on the changes in received props conditionally. But it is rarely used since it is a performance overhead.
+	
+	c.render(){...}
+		part of every React Component, it is a pure function which returns the same result every time it is called which means, it doesn't modify any component's state.
+	
+	d.componentDidMount(){...}
+		is invoked immediately after the component is mounted to DOM tree. It will have access to all the DOM nodes hence any initialization which requires DOM nodes should be done here. Ideal place for setting timers and handling Ajax request since data should be attached to existing DOM nodes for display.
+
+
+Ok. That's for the story of Mounting phase. Now for some action.
+
+1. Create a component LCTester.js under components/lc with the below code:
+	import React, { Component } from "react";
+
+	export default class LCTester extends Component {
+	  constructor(props) {
+		super(props);
+		this.state = { favoritecolor: "Red" };
+	  }
+
+	  // will override state set by constructor as it runs
+	  // after constructor.
+	  // avoid if possible since it is a performance overhead
+	  static getDerivedStateFromProps(props, state) {
+		return { favoritecolor: props.favcol };
+	  }
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<p>Favorite Color (child) : {this.state.favoritecolor}</p>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+	
+2. Create a component Tester in the same folder with below code and add it to navigation, with path 'lc'
+	import React, { Component } from "react";
+	import LCTester from "./LCTester";
+
+	export default class Tester extends Component {
+	  constructor() {
+		super();
+		this.state = { favoritecolor: "Yellow" };
+	  }
+	  render() {
+		return (
+		  <React.Fragment>
+			<h2>Life Cycle Demo</h2>
+			<article className="p-1 border border-secondary rounded">
+			  <h3>LC Hooks</h3>
+			  <p>Favorite Color in Tester : {this.state.favoritecolor}</p>
+			  <LCTester favcol={this.state.favoritecolor} />
+			</article>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+3. Parent sends value 'Yellow' as prop but Child has initialized same value to 'Red'. Can you guess the output in Child?
+
+
+4. Suppose you want to find out how long user was on this page. Update code of Tester to display seconds elapsed as shown:
+	import React, { Component } from "react";
+	import LCTester from "./LCTester";
+
+	export default class Tester extends Component {
+	  constructor() {
+		super();
+		this.state = { favoritecolor: "Yellow", secondsElapsed: 0 };
+	  }
+
+	  // js methods to update state
+	  // will be called by componentDidMount
+	  startTimer = () => {
+		this.setState({
+		  secondsElapsed: this.state.secondsElapsed + 1,
+		});
+	  };
+
+	  /**
+	   * this method runs after the component output has been
+	   * rendered to the DOM. This is a good place to set up
+	   * timers, or make WS calls.
+	   */
+	  componentDidMount() {
+		this.secondsCounter = setInterval(this.startTimer, 1000);
+	  }
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<h2>Life Cycle Demo</h2>
+			<article className="p-1 border border-secondary rounded">
+			  <h3>LC Hooks</h3>
+			  <p>Favorite Color in Tester : {this.state.favoritecolor}</p>
+			  <LCTester favcol={this.state.favoritecolor} />
+			  <p className="lead">
+				You have spent {this.state.secondsElapsed} seconds on this page.
+			  </p>
+			</article>
+		  </React.Fragment>
+		);
+	  }
+	}
+

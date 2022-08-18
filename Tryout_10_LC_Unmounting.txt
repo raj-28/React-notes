@@ -1,0 +1,33 @@
+Unmounting phase
+++++++++++++++++
+The last phase in the lifecycle is when a component is removed from the DOM, or unmounting, as React likes to call it. React has only one built-in method that gets called when a component is unmounted:
+    a.componentWillUnmount(){...}
+		is called when the component is about to be removed from the DOM.
+		
+This is the place for performing any necessary cleanup, e.g., any subscription which was created in componentDidMount(). A component can be unmounted from DOM using ReactDOM.unmountComponentAtNode() or when you move to a different view.
+
+1. Update code of Tester to:
+	...
+
+	export default class Tester extends Component {
+	  ...
+	  componentDidMount() {
+		this.secondsCounter = setInterval(this.startTimer, 1000);
+	  }
+
+	  /**
+	   * tear down the timer when the component is no longer
+	   * in use
+	   */
+	  componentWillUnmount() {
+		clearInterval(this.secondsCounter);
+		alert("Tester will unmount...");
+	  }
+
+	  render() {
+		return (
+		  ...
+		);
+	  }
+	}
+

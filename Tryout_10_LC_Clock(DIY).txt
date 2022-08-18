@@ -1,0 +1,138 @@
+Now assume that we are creating a React Clock. Naturally, time will be part of state and will be changed every second, using JS setInterval() method. We will have a stateful Clock component to manage changes in time and another stateless DisplayClock component to display the time.
+
+1. Mounting phase
++++++++++++++++++
+	Clock.js
+	--------
+	import React, { Component } from 'react'
+	import DisplayClock from './DisplayClock';
+
+	export default class Clock extends Component {
+		constructor(props) {
+			super(props);
+			this.state = {date: new Date()};
+		}
+
+		// method to set state
+		updateTime() {
+			this.setState({
+			  date: new Date()
+			});
+		}
+
+		// There is no point if the clock starts before the 
+		// HTML DOM nodes to display it is ready. 
+		// Clock logic should start only after the DOM nodes have
+		// mounted. Hence this code is better in componentDidMount(){...} 
+		// rather than in constructor()
+		componentDidMount() {
+			this.secondsCounter = setInterval(
+			  () => this.updateTime(),
+			  1000
+			);
+		}
+		
+		render() {
+			return (
+				<React.Fragment>
+					<h2>React Digital Clock</h2>
+					// We are calling stateless component to display the time
+					// by the state as a prop to it
+					<DisplayClock time={this.state.date.toLocaleTimeString()} />
+				</React.Fragment>
+			)
+		}
+	}
+	
+	DisplayClock.js
+	---------------
+	import React, { Component } from 'react'
+
+	export default class DisplayClock extends Component {
+		render() {
+			return (
+				<h3>Time is: {this.props.time}.</h3>
+			)
+		}
+	}
+
+Add <Clock /> to navigation and you should see the React Digital Clock.
+
+
+2. Updating phase
++++++++++++++++++
+DisplayClock component receives value in the format hh:mm:ss AM/PM. What if the clock should work only during AM? I know this is a stupid requirement, but bear with me. 
+	DisplayClock.js
+	---------------
+	import React, { Component } from 'react'
+
+	export default class DisplayClock extends Component {
+		
+		shouldComponentUpdate(newProps, newState){
+			// splitting time received as part of newProps as array
+			let currTimeAsArray = newProps.time.split(" ");
+			
+			// AM/PM would be at the last position of the array
+			let lastIndex = currTimeAsArray.length - 1;
+			const amORpm = currTimeAsArray[lastIndex];
+
+			// preventing clock from updating if it is PM
+			if(amORpm === "PM")
+				return false
+			else
+				return true;
+		}
+
+		render() {
+			return (
+				<h3>Time is- {this.props.time}.</h3>
+			)
+		}
+	}
+
+
+3. Unmounting phase
++++++++++++++++++++
+Let's say we want to know when our Clock is being unmounted. Oh and when the Clock is unmounted, we have to clear the interval too. So the complete code will be
+	Clock.js
+	--------
+	import React, { Component } from 'react'
+	import DisplayClock from './DisplayClock';
+
+	export default class Clock extends Component {
+		constructor(props) {
+			super(props);
+			this.state = {date: new Date()};
+		}
+
+		updateTime() {
+			this.setState({
+			  date: new Date()
+			});
+		}
+
+		componentDidMount() {
+			this.secondsCounter = setInterval(
+			  () => this.updateTime(),
+			  1000
+			);
+		}
+
+		componentWillUnmount(){
+			clearInterval(this.secondsCounter);
+			alert("Clock is being unmounted")
+		}
+		
+		render() {
+			return (
+				<React.Fragment>
+					<h2>React Digital Clock</h2>
+					<DisplayClock time={this.state.date.toLocaleTimeString()} />
+				</React.Fragment>
+			)
+		}
+	}
+		
+		
+ToDo:
+Modify the code such that clock works between 9AM and 6PM.

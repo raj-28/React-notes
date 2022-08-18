@@ -1,0 +1,191 @@
+React Redux
+===========
+
+1.Project with Redux setup
+	a.Create a new app redux-starter in your workspace
+		npx create-react-app redux-starter 
+		
+	b.Add redux and react-redux libraries to the project
+		npm i redux react-redux
+	
+	c.Add bootstrap to index.html
+	
+Note:If you add the flag '--template redux' to 1.a, you will get the standard redux starter template, which has redux/toolkit and react-redux. You can then ignore 1.b
+
+2.Planning ahead
+	a.First step when using React-Redux is to define the possible states of the application. Since this demo is of a counter, the initial state to be stored will be
+		const initialState = { count: 0 }; // state is immutable, hence initialised as const
+	b.Next, figure out actions which could affect the state, their types and payload. For this counter demo, the actions are INCREMENT and DECREMENT.
+	c.Then, design reducers which will accept (state,action) and return the new state 
+	
+Now that you have plans the pillars of redux ready, start with Action creators.
+ 	
+3.Action Creators
+Create counterActions.js under src\actions with below code
+	export const Increment = (step) => {
+	  //return Action object
+	  return {
+		type: "INCREMENT", // type of Action
+		payload: {
+		  // data passed as part of Action
+		  data: step,
+		},
+	  };
+	};
+
+	export const Decrement = (step) => {
+	  //return Action object
+	  return {
+		type: "DECREMENT", // type of Action
+		payload: {
+		  // data passed as part of Action
+		  data: step,
+		},
+	  };
+	};
+
+	
+4. Reducers
+Assuming the application might have multiple reducers, 
+	a.create counterReducer.js under src\reducers with below code
+		const initialState = { count: 0 }; // state is immutable, hence initialised as const
+
+		const counterReducer = (state = initialState, action) => {
+		  //check whether the reducer cares about this action
+		  switch (action.type) {
+			// if yes
+			case "INCREMENT":
+			  //make a copy of the state
+			  return Object.assign(
+				{},
+				state,
+				//update the copy with new values
+				{ count: state.count + action.payload.data }
+			  );
+
+			// update copy of store for INCREMENT
+			case "DECREMENT":
+			  return Object.assign({}, state, {
+				count: state.count - action.payload.data,
+			  });
+
+			//otherwise, return the existing state unchanged
+			default:
+			  return state;
+		  }
+		};
+
+		export default counterReducer;
+		
+	b. A Redux store needs to have a single reducer function passed in when it's created. So if there are multiple reducer functions, use 'combineReducer' of Redux to combine them into a single object.
+	Create index.js under src\reducers with below code:
+		import { combineReducers } from "redux";
+		import counterReducer from "./counterReducer";
+
+		const rootReducer = combineReducers({
+		  counterReducer,
+		});
+		/**
+		 * combineReducers accepts an object full of reducer functions as its argument
+		 * and returns a function that calls each reducer whenever an action is dispatched. 
+		 * The result from each reducer are all combined together into a single object 
+		 * as the final result. 
+		 */
+
+		export default rootReducer;
+		
+
+5.Store
+Create Store at root level or inside src\store
+	import { createStore } from "redux";
+	import rootReducer from "../reducers";
+
+	// create store based on initilization and
+	//dispatch actions defined in reducer
+	var store = createStore(
+	  rootReducer,
+	  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+	  // to activate redux dev tools on browser
+	);
+ 
+	export default store;
+		
+
+6. Bind Store to the application. It can be done either at component level or Root level, i.e., in index.js.
+	...
+	import { Provider } from "react-redux";
+	import store from "./store";	// if store is created at root level
+
+	ReactDOM.render(
+	  <React.StrictMode>
+		<Provider store={store}>
+		  <App />
+		</Provider>
+	  </React.StrictMode>,
+	  document.getElementById("root")
+	);
+	
+	...
+	
+	
+7. Create Counter.js under src\components
+	import React from "react";
+	import { useSelector, useDispatch } from "react-redux";
+	import { Increment, Decrement } from "../actions/counterActions";
+
+	const Counter = () => {
+	  /*useSelector hook lets component extract pieces of data from Redux store state
+	   * Any time an action has been dispatched and the Redux store has been updated,
+	   * useSelector will re-run the selector function. If the selector returns
+	   * a new value, useSelector will re-render component with the new value.
+	   */
+	  const count = useSelector((state) => state.counterReducer.count);
+
+	  /**
+	   * useDispatch hook provides actual dispatch method from the Redux store.
+	   */
+	  const dispatch = useDispatch(); // connect to store's dispatcher
+
+	  return (
+		<React.Fragment>
+		  <header className="m-1 border border-dark rounded">
+			<h1 className="text-center text-primary">Redux Demo</h1>
+		  </header>
+		  <section className="m-1 border border-dark rounded">
+			<p className="m-2 lead">Value from store: {count}</p>
+			<button
+			  className="btn btn-success btn-sm m-2"
+			  onClick={() => {
+				dispatch(Increment(1)); //dispatch Increment action
+			  }}
+			>
+			  Increment
+			</button>
+			<button
+			  className="btn btn-warning btn-sm"
+			  onClick={() => {
+				dispatch(Decrement(1)); //dispatch Decrement action
+			  }}
+			>
+			  Decrement
+			</button>
+		  </section>
+		</React.Fragment>
+	  );
+	};
+
+	export default Counter;
+
+
+
+8.Modify App.js to:
+	import Counter from "./components/Counter";
+
+	const App = () => {
+	  return <Counter />;
+	};
+
+	export default App;
+		
+		
+9. Save and run the application. Check state undex Redux Dev tools.

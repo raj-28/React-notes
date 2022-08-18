@@ -1,0 +1,137 @@
+React JS Intro
+==============
+React is a component based, declarative JavaScript library for building user interfaces. That's it. Nothing more, nothing less.
+
+Adding React to a Web app
+-------------------------
+Suppose you have an existing web application and you want to add React-ify it, let's say for some small portion in a page. You can use React CDN for this purpose.
+
+1. Create a folder 'simplewebapp' and open it in Visual Studio Code (VSC)
+
+2. Create 'index.html' with relevant code as shown below
+	<!DOCTYPE html>
+	<html lang="en">
+	  <head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Sample Web App</title>
+	  </head>
+	  <body>
+		<!-- check if JS is enabled in browser -->
+		<noscript>You need to enable JavaScript to run this app.</noscript>
+
+		<header>
+		  <h1>Sample web App</h1>
+		</header>
+		<p>Sample page to check how to add React CDN</p>
+		
+		<div id="tobe_reactified">
+		  <!-- content will be added using React -->
+		</div>
+	  
+	  </body>
+	</html>
+	
+
+3. Create 'app.js'. This file will contain your React code
+
+4. Add React to the page using React CDN, in index,html, just before </body>, as shown
+			...
+			<!-- add React and React DOM-->
+			<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+			<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+
+			<!-- add your React source -->
+			<script src="app.js"></script>
+		</body>
+	</html>
+	
+
+5. Update app.js as shown:
+	// select the html tag that will contain the React element
+	const container = document.querySelector("#tobe_reactified");
+
+	// render the content with React.createElement
+	ReactDOM.render(
+	  React.createElement(
+		"h2", //presentation logic, i.e., the html tag to be rendered
+		null, //attributes of the tag in an {}
+		"Hello from React" // data or text to be displayed
+	  ),
+	  container
+	);
+
+	
+6. Save and check the output on browser and inspector
+
+
+7. What you did in 5 is not the most ideal way to write a React code. React code should be written inside React Components. Update app.js as:
+	class App extends React.Component {		// component as a class
+	  render() {
+		return React.createElement("h2", {}, "Hello from React Component");
+	  }
+	}
+
+	// select the html tag that will contain the React element
+	const container = document.querySelector("#tobe_reactified");
+
+	// render the component to ReactDOM
+	ReactDOM.render(React.createElement(App), container);
+
+Save and check the output.
+
+
+8. What if the h2 tag is inside a <section>? You App component will now be:
+	class App extends React.Component {
+	  render() {
+		return React.createElement(
+		  "section",
+		  null,
+		  React.createElement("h2", {}, "Hello from React Nested Component")
+		);
+	  }
+	}
+
+Save and check the output.
+
+Hmm...The above code looks tolerably complicated. But what if the component is a form with 10 input elements with checkboxes, radio buttons or dropdowns? Scary right?
+
+Enter JSX
+---------
+JSX is a syntax extension to JavaScript. You can use it with React to describe what the UI should look like. JSX may remind you of a template language, but it comes with the full power of JavaScript.
+
+9. Since JSX directly produces React “elements”, your app.js will now be:
+	class App extends React.Component {
+	  render() {
+		return (
+		  <section>
+			<h2>Hello from React with JSX</h2>
+		  </section>
+		);
+	  }
+	}
+
+	// select the html tag that will contain the React element
+	const container = document.querySelector("#tobe_reactified");
+
+	// render the component to ReactDOM
+	ReactDOM.render(<App />, container);
+
+Your React code is now simple and straightforward.
+
+10. A preproccessor like babel will be required so that your it can be compiled to JS which your browser understands. Modify inex.html as
+	...
+		<!-- add babel converter for JSX -->
+		<script
+		  src="https://unpkg.com/babel-standalone@6/babel.min.js"
+		  crossorigin
+		></script>
+
+		<!-- add your React source, with type as text/babel -->
+		<script type="text/babel" src="app.js" crossorigin></script>
+	  </body>
+	</html>
+
+
+You have now seen how to add React with Components and JSX to an existing web application.

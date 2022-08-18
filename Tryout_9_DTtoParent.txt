@@ -1,0 +1,68 @@
+Data transfer from Child to Parent
+==================================
+You have seen how to send data from Parent to Child component. This confirms with the unidirectional data-flow that React is proud of. What if you want to send data from Child to Parent?
+
+React allows to send data from Child to Parent using combinations of props and state. First, Parent will have the initial data as a state variable. If the child component wants to send data to the parent component, it can send it by invoking a function that is passed as props from the parent component. This function then updates the state variable.
+
+1. Update code in Parent.js to:
+	import React from "react";
+	import Child from "./Child";
+
+	export default class Parent extends React.Component {
+	  constructor() {
+		super();
+		// initial value in state
+		this.state = {
+		  valueReceivedFromChild: "Nothing received yet",
+		};
+	  }
+
+	  // method to be passed to child which will receive value from it
+	  onUpdate = (value) => {
+		this.setState({ valueReceivedFromChild: value });
+	  };
+
+	  render() {
+		let valueToPass = "Hello from Parent";
+		return (
+		  <React.Fragment>
+			<h2>Props Demo</h2>
+			<h3>In Parent</h3>
+			<p>Value in Parent: {valueToPass}</p>
+			<p>Value Received from Child: {this.state.valueReceivedFromChild}</p>
+			<Child valuePassed={valueToPass} onUpdate={this.onUpdate}></Child>
+		  </React.Fragment>
+		);
+	  }
+	}
+
+
+2. Update code of Child.js to:
+	import React from "react";
+
+	export default class Child extends React.Component {
+	  constructor(props) {
+		super(props);
+	  }
+
+	  onSendValueToParent = () => {
+		// calling the received method of parent with value
+		this.props.onUpdate("Hello from Child");
+	  };
+
+	  render() {
+		return (
+		  <React.Fragment>
+			<h2>In Child</h2>
+			<p>Value received from Parent: {this.props.valuePassed}</p>
+			<button
+			  type="button"
+			  className="btn btn-outline-warning"
+			  onClick={this.onSendValueToParent}
+			>
+			  Send Value to Parent
+			</button>
+		  </React.Fragment>
+		);
+	  }
+	}
